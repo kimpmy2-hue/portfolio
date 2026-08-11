@@ -1,3 +1,51 @@
+/* ========================================
+   Hero → Works → About bridge animation
+========================================= */
+
+const worksBridge = document.querySelector(".hero__works-bridge");
+
+if (worksBridge) {
+  const worksBridgeObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      threshold: 0.35,
+    }
+  );
+
+  worksBridgeObserver.observe(worksBridge);
+}
+
+/* Web Design 01〜06 sequential animation */
+const processItems = document.querySelectorAll(".web-process__item");
+
+if (processItems.length) {
+  const processObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        processItems.forEach((item) => {
+          item.classList.add("is-visible");
+        });
+
+        observer.disconnect();
+      });
+    },
+    {
+      threshold: 0.3,
+    }
+  );
+
+  processObserver.observe(processItems[0]);
+}
+
 // =========================
 // Other Works Slider
 // =========================
@@ -60,49 +108,360 @@ const otherWorks = [
   }
 ];
 
-let currentOtherWorkIndex = 0;
+// ========================================
+// Other Works Indicator
+// ========================================
 
-const otherWorkImage = document.getElementById("other-work-image");
-const otherWorkCategory = document.getElementById("other-work-category");
-const otherWorkTitle = document.getElementById("other-work-title");
-const otherWorkCatch = document.getElementById("other-work-catch");
-const otherWorkPurpose = document.getElementById("other-work-purpose");
-const otherWorkTarget = document.getElementById("other-work-target");
-const otherWorkRole = document.getElementById("other-work-role");
-const otherWorkTools = document.getElementById("other-work-tools");
-const otherWorkCounter = document.getElementById("other-work-counter");
-const otherWorkPrev = document.getElementById("other-work-prev");
-const otherWorkNext = document.getElementById("other-work-next");
+const otherWorksDotsContainer =
+  document.querySelector(".other-works__dots");
 
-function updateOtherWork() {
-  const work = otherWorks[currentOtherWorkIndex];
+const otherWorksLastNumber =
+  document.querySelector(".other-works__last-number");
 
-  otherWorkImage.src = work.image;
-  otherWorkImage.alt = work.alt;
-  otherWorkCategory.textContent = work.category;
-  otherWorkTitle.innerHTML = work.title;
-  otherWorkCatch.textContent = work.catchCopy;
-  otherWorkPurpose.textContent = work.purpose;
-  otherWorkTarget.textContent = work.target;
-  otherWorkRole.textContent = work.role;
-  otherWorkTools.textContent = work.tools;
+function createOtherWorksIndicator() {
+  if (!otherWorksDotsContainer) return;
 
-  otherWorkCounter.textContent =
-    `${String(currentOtherWorkIndex + 1).padStart(2, "0")} / ${String(otherWorks.length).padStart(2, "0")}`;
+  // 一度空にする
+  otherWorksDotsContainer.innerHTML = "";
+
+  // 作品数に合わせてドットを自動生成
+  otherWorks.forEach((work, index) => {
+  const dot = document.createElement("button");
+
+  dot.className = "other-works__dot";
+  dot.type = "button";
+
+  if (index === 0) {
+    dot.classList.add("is-active");
+  }
+
+  dot.setAttribute(
+    "aria-label",
+    `${index + 1}件目を表示`
+  );
+
+  /* クリックした作品へ切り替え */
+  dot.addEventListener("click", () => {
+    currentOtherWorkIndex = index;
+
+    updateOtherWork();
+
+    /* activeの横線を移動 */
+    const dots =
+      document.querySelectorAll(".other-works__dot");
+
+    dots.forEach((item, dotIndex) => {
+      item.classList.toggle(
+        "is-active",
+        dotIndex === currentOtherWorkIndex
+      );
+    });
+  });
+
+  otherWorksDotsContainer.appendChild(dot);
+});
+
+  // 最後の数字も作品数から自動取得
+  if (otherWorksLastNumber) {
+    otherWorksLastNumber.textContent =
+      String(otherWorks.length).padStart(2, "0");
+  }
 }
 
-otherWorkNext.addEventListener("click", () => {
+createOtherWorksIndicator();
+
+function updateOtherWorksIndicator() {
+  const dots =
+    document.querySelectorAll(".other-works__dot");
+
+  dots.forEach((dot, index) => {
+    dot.classList.toggle(
+      "is-active",
+      index === currentOtherWorkIndex
+    );
+  });
+}
+
+/* ========================================
+   Other Works Slider
+======================================== */
+
+let currentOtherWorkIndex = 0;
+
+
+/* 要素を取得 */
+const otherWorkImage =
+  document.getElementById("other-work-image");
+
+const otherWorkCategory =
+  document.getElementById("other-work-category");
+
+const otherWorkTitle =
+  document.getElementById("other-work-title");
+
+const otherWorkCatch =
+  document.getElementById("other-work-catch");
+
+const otherWorkPurpose =
+  document.getElementById("other-work-purpose");
+
+const otherWorkTarget =
+  document.getElementById("other-work-target");
+
+const otherWorkRole =
+  document.getElementById("other-work-role");
+
+const otherWorkTools =
+  document.getElementById("other-work-tools");
+
+
+/* ========================================
+   表示更新
+======================================== */
+
+let isFirstOtherWorkRender = true;
+
+function updateOtherWork() {
+
+  const visual = document.querySelector(".other-works__visual");
+  const content = document.querySelector(".other-work__content");
+
+  /* 初回表示だけフェードなし */
+  if (isFirstOtherWorkRender) {
+
+    const work = otherWorks[currentOtherWorkIndex];
+
+    otherWorkImage.src = work.image;
+    otherWorkImage.alt = work.alt;
+
+    otherWorkCategory.textContent = work.category;
+    otherWorkTitle.innerHTML = work.title;
+    otherWorkCatch.textContent = work.catchCopy;
+
+    otherWorkPurpose.textContent = work.purpose;
+    otherWorkTarget.textContent = work.target;
+    otherWorkRole.textContent = work.role;
+    otherWorkTools.textContent = work.tools;
+
+    updateOtherWorksIndicator();
+
+    isFirstOtherWorkRender = false;
+
+    return;
+  }
+
+
+  /* 2回目以降はフェード */
+  visual.classList.add("is-fading");
+  content.classList.add("is-fading");
+
+
+  setTimeout(() => {
+
+    const work = otherWorks[currentOtherWorkIndex];
+
+    otherWorkImage.src = work.image;
+    otherWorkImage.alt = work.alt;
+
+    otherWorkCategory.textContent = work.category;
+    otherWorkTitle.innerHTML = work.title;
+    otherWorkCatch.textContent = work.catchCopy;
+
+    otherWorkPurpose.textContent = work.purpose;
+    otherWorkTarget.textContent = work.target;
+    otherWorkRole.textContent = work.role;
+    otherWorkTools.textContent = work.tools;
+
+    updateOtherWorksIndicator();
+
+    visual.classList.remove("is-fading");
+    content.classList.remove("is-fading");
+
+  }, 400);
+}
+
+/* 初期表示 */
+updateOtherWork();
+
+
+/* ========================================
+   Other Works Auto Slide
+======================================== */
+
+setInterval(() => {
+
   currentOtherWorkIndex =
     (currentOtherWorkIndex + 1) % otherWorks.length;
 
   updateOtherWork();
-});
 
-otherWorkPrev.addEventListener("click", () => {
-  currentOtherWorkIndex =
-    (currentOtherWorkIndex - 1 + otherWorks.length) % otherWorks.length;
+}, 6500);
 
-  updateOtherWork();
-});
 
-updateOtherWork();
+
+/* About line animation */
+
+const about = document.querySelector(".about");
+
+if (about) {
+
+  const aboutObserver = new IntersectionObserver((entries, observer) => {
+
+    entries.forEach(entry => {
+
+      if (!entry.isIntersecting) return;
+
+      entry.target.classList.add("is-visible");
+
+      observer.unobserve(entry.target);
+
+      const aboutSection = document.querySelector(".about");
+
+if (aboutSection) {
+  setTimeout(() => {
+    aboutSection.classList.add("is-visible");
+  }, 2500);
+}
+
+    });
+
+  }, {
+    threshold: 0.5
+  });
+
+  aboutObserver.observe(about);
+
+}
+
+/* ========================================
+   SNS SLIDER
+======================================== */
+
+const snsSlides = document.querySelectorAll(".sns-slide");
+const snsDots = document.querySelectorAll(".sns-slider__dot");
+
+if (snsSlides.length > 1 && snsDots.length === snsSlides.length) {
+
+  let currentSlide = 0;
+  let snsTimer;
+
+
+  /* スライド切り替え */
+  function showSnsSlide(index) {
+
+    snsSlides.forEach((slide) => {
+      slide.classList.remove("is-active");
+    });
+
+    snsDots.forEach((dot) => {
+      dot.classList.remove("is-active");
+    });
+
+
+    currentSlide = index;
+
+
+    snsSlides[currentSlide].classList.add("is-active");
+    snsDots[currentSlide].classList.add("is-active");
+
+  }
+
+
+  /* 自動再生 */
+  function startSnsSlider() {
+
+    snsTimer = setInterval(() => {
+
+      const nextSlide =
+        (currentSlide + 1) % snsSlides.length;
+
+      showSnsSlide(nextSlide);
+
+    }, 7000);
+
+  }
+
+
+  /* インジケーターをクリック */
+  snsDots.forEach((dot, index) => {
+
+    dot.addEventListener("click", () => {
+
+      clearInterval(snsTimer);
+
+      showSnsSlide(index);
+
+      startSnsSlider();
+
+    });
+
+  });
+
+
+  /* スタート */
+  showSnsSlide(0);
+  startSnsSlider();
+
+}
+
+/* ========================================
+   SECTION LINE HEADING
+======================================== */
+
+const sectionLineHeadings =
+  document.querySelectorAll(".section-line-heading");
+
+if (sectionLineHeadings.length) {
+
+  const sectionLineObserver =
+    new IntersectionObserver(
+      (entries, observer) => {
+
+        entries.forEach((entry) => {
+
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("is-visible");
+
+          observer.unobserve(entry.target);
+
+        });
+
+      },
+      {
+        threshold: 0.4
+      }
+    );
+
+
+  sectionLineHeadings.forEach((heading) => {
+    sectionLineObserver.observe(heading);
+  });
+
+}
+
+const contactSection = document.querySelector(".contact");
+
+if (contactSection) {
+
+  const contactObserver = new IntersectionObserver(
+    (entries, observer) => {
+
+      entries.forEach((entry) => {
+
+        if (!entry.isIntersecting) return;
+
+        entry.target.classList.add("is-visible");
+
+        observer.unobserve(entry.target);
+
+      });
+
+    },
+    {
+      threshold: 0.35
+    }
+  );
+
+  contactObserver.observe(contactSection);
+}
