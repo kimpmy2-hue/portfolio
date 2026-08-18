@@ -465,3 +465,83 @@ if (contactSection) {
 
   contactObserver.observe(contactSection);
 }
+
+/* ========================================
+   スマホハンバーガー
+======================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const menuButton = document.querySelector(".menu-button");
+  const headerNav = document.querySelector(".header__nav");
+
+  if (!menuButton || !headerNav) return;
+
+  menuButton.addEventListener("click", () => {
+    headerNav.classList.toggle("is-open");
+    menuButton.classList.toggle("is-open");
+  });
+});
+
+
+
+
+
+
+
+
+const snsGallery = document.querySelector('.sns__gallery');
+
+if (snsGallery && window.innerWidth <= 768) {
+  const snsItems = [...snsGallery.children];
+
+  const unravelSNS = () => {
+    const firstPositions = snsItems.map(item =>
+      item.getBoundingClientRect()
+    );
+
+    snsGallery.classList.add('is-unravelled');
+
+    const lastPositions = snsItems.map(item =>
+      item.getBoundingClientRect()
+    );
+
+    snsItems.forEach((item, index) => {
+      const deltaX =
+        firstPositions[index].left -
+        lastPositions[index].left;
+
+      const deltaY =
+        firstPositions[index].top -
+        lastPositions[index].top;
+
+      item.style.transition = 'none';
+      item.style.transform =
+        `translate(${deltaX}px, ${deltaY}px)`;
+    });
+
+    snsGallery.offsetHeight;
+
+    snsItems.forEach((item, index) => {
+      item.style.transition =
+        `transform 1.2s cubic-bezier(.22, 1, .36, 1) ${index * 0.4}s`;
+
+      item.style.transform = 'translate(0, 0)';
+    });
+  };
+
+  const snsObserver = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          unravelSNS();
+          snsObserver.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 1.0
+    }
+  );
+
+  snsObserver.observe(snsGallery);
+}
