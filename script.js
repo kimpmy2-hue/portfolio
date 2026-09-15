@@ -466,22 +466,52 @@ if (contactSection) {
   contactObserver.observe(contactSection);
 }
 
+
 /* ========================================
+
    スマホハンバーガー
+
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const menuButton = document.querySelector(".menu-button");
   const headerNav = document.querySelector(".header__nav");
+  const navLinks = document.querySelectorAll(".header__nav-link");
 
   if (!menuButton || !headerNav) return;
 
+  // ハンバーガーボタンを押したとき
   menuButton.addEventListener("click", () => {
-    headerNav.classList.toggle("is-open");
-    menuButton.classList.toggle("is-open");
-  });
-});
 
+    const isOpen = headerNav.classList.toggle("is-open");
+    menuButton.classList.toggle("is-open");
+
+    // アクセシビリティ対応
+    menuButton.setAttribute("aria-expanded", isOpen);
+    menuButton.setAttribute(
+      "aria-label",
+      isOpen ? "メニューを閉じる" : "メニューを開く"
+    );
+
+  });
+
+  // メニュー内のリンクを押したら閉じる
+  navLinks.forEach((link) => {
+
+    link.addEventListener("click", () => {
+
+      headerNav.classList.remove("is-open");
+      menuButton.classList.remove("is-open");
+
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "メニューを開く");
+
+    });
+
+  });
+
+});
 
 
 
